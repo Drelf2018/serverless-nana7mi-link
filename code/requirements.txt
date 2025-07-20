@@ -3,6 +3,7 @@ cssselect
 fastapi
 httpx
 lxml
+onnxruntime
 openai
 pydantic
 rembg

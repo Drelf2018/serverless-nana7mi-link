@@ -9,7 +9,8 @@ from wand.color import Color
 from wand.drawing import Drawing
 from wand.image import Image
 
-session = rembg.new_session()  # models: https://github.com/danielgatis/rembg/releases/tag/v0.0.0
+# models: https://github.com/danielgatis/rembg/releases/tag/v0.0.0
+u2net = rembg.new_session("u2net")
 isnet_anime = rembg.new_session("isnet-anime")
 
 
@@ -52,7 +53,7 @@ def get_removed_image(origin: bytes) -> Image:
     if count_transparent_pixels(rem) <= 0.8:
         return rem
     # 空白比例过高则更换模型重试
-    b = rembg.remove(origin, session=session)
+    b = rembg.remove(origin, session=u2net)
     rem = Image(blob=b, format="png")
     rem.alpha_channel = True
     return rem
