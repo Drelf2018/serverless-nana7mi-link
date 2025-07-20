@@ -1,2 +1,12 @@
-fastapi==0.104.1
-uvicorn==0.24.0.post1
+cloudscraper
+cssselect
+fastapi
+httpx
+lxml
+openai
+pydantic
+rembg
+sseclient_py
+uvicorn
+Wand
+wasmtime

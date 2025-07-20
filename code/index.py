@@ -1,41 +1,66 @@
+import os
+import sys
+from importlib import import_module
+from pathlib import Path
+from typing import Optional
+
 import uvicorn
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+
+__dir__ = Path(__file__).parent
+
+
+def get_router(path: str) -> Optional[APIRouter]:
+    """
+    从模块中获取 API 路由
+
+    Args:
+        path (str): 模块名
+
+    Returns:
+        API 路由
+    """
+    if not path.startswith("_"):
+        router = getattr(import_module(path), "router", None)
+        if router is not None and isinstance(router, APIRouter):
+            return router
+
+
+def auto_include_router(app: FastAPI, folder: str):
+    """
+    自动导入路由组
+
+    Args:
+        app (FastAPI): 应用
+        folder (str): 要导入的文件夹
+    """
+    for dirpath, dirnames, filenames in os.walk(__dir__ / folder):
+        sys.path.append(dirpath)
+        dirpath = str(Path(dirpath).relative_to(__dir__)).replace("\\", "/")
+        for file in filenames:
+            if file.endswith(".py"):
+                file = file.removesuffix(".py")
+                router = get_router(file)
+                if router is not None:
+                    app.include_router(router, prefix=f"/{dirpath}/{file}")
+        for dir in dirnames:
+            if not dir.startswith("."):
+                router = get_router(dir)
+                if router is not None:
+                    app.include_router(router, prefix=f"/{dirpath}/{dir}")
+
 
 app = FastAPI()
 
 
-@app.get("/")
-async def hello():
-    return HTMLResponse(
-        """<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Serverless Devs - Powered By Serverless Devs</title>
-    <link href="https://example-static.oss-cn-beijing.aliyuncs.com/web-framework/style.css" rel="stylesheet" type="text/css"/>
-</head>
-<body>
-<div class="website">
-    <div class="ri-t">
-        <h1>Devsapp</h1>
-        <h2>这是一个 FastAPI 项目</h2>
-        <span>自豪地通过Serverless Devs进行部署</span>
-        <br/>
-        <p>您也可以快速体验： <br/>
-            • 下载Serverless Devs工具：npm install @serverless-devs/s<br/>
-            • 初始化项目：s init start-fastapi-v3<br/>
-
-            • 项目部署：s deploy<br/>
-            <br/>
-            Serverless Devs 钉钉交流群：33947367
-        </p>
-    </div>
-</div>
-</body>
-</html>
-"""
-    )
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse("favicon.ico")
 
 
 if __name__ == "__main__":
+    auto_include_router(app, "api")
+    app.mount("/", StaticFiles(directory=__dir__ / "web", html=True))
     uvicorn.run(app, host="0.0.0.0", port=9000)
