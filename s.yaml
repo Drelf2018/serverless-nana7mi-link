@@ -1,11 +1,6 @@
-# ------------------------------------
-#   官方手册: https://manual.serverless-devs.com/user-guide/aliyun/#fc3
-#   有问题快来钉钉群问一下吧：33947367
-# ------------------------------------
-
 edition: 3.0.0
 name: start-fastapi-app
-access: 'undefined'
+access: default
 vars: 
   region: 'cn-hangzhou'
   functionName: 'serverless-nana7mi-link'
@@ -20,27 +15,43 @@ resources:
           path: ./code
     props: 
       region: ${vars.region} 
+      handler: handler
+      role: acs:ram::1990019364850918:role/aliyunfcserverlessdevsrole
+      disableOndemand: false
+      nasConfig:
+        groupId: 0
+        mountPoints:
+          - enableTLS: false
+            serverAddr: >-
+              0c8a2482d9-xrj6.cn-hangzhou.nas.aliyuncs.com:/serverless-nana7mi-link
+            mountDir: /mnt/serverless-nana7mi-link
+        userId: 0
       description: Serverless Devs Web Framework Function
       runtime: custom.debian10
       timeout: 60
       environmentVariables:
         PATH: >-
           /var/fc/lang/python3.10/bin:/usr/local/bin/apache-maven/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/ruby/bin:/opt/bin:/code:/code/bin
+        EXCLUDE: '["api/avatar"]'
+        TZ: Asia/Shanghai
+      diskSize: 512
+      internetAccess: true
+      resourceGroupId: rg-acfm4nhoa47izzq
       customRuntimeConfig:
         command:
           - python3
         args:
           - '-u'
           - index.py
+        healthCheckConfig: {}
       functionName: ${vars.functionName}
       code: ./code
-  fc3_domain_0:
-    component: fc3-domain
-    props:
-      region: ${vars.region}
-      domainName: auto
-      protocol: HTTP
-      routeConfig:
-        routes:
-          - path: /*
-            functionName: ${vars.functionName}
+      cpu: 0.35
+      instanceConcurrency: 1
+      memorySize: 512
+      vpcConfig:
+        securityGroupId: sg-bp19ogoxqzo6tnqxwir0
+        vpcId: vpc-bp1mfyussudzb4f7zlvli
+        vSwitchIds:
+          - vsw-bp1njly7b7d8yyiafrw10
+      

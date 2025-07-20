@@ -33,7 +33,7 @@ scraper = cloudscraper.create_scraper()
 @router.get("/")
 async def get_acrnm_products() -> List[Product]:
     """
-    获取 ACRNM 上架的商品
+    获取 ACRNM 上架的商品列表
 
     Returns:
         商品列表

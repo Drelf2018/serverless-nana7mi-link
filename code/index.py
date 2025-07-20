@@ -1,8 +1,9 @@
+import json
 import os
 import sys
 from importlib import import_module
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import uvicorn
 from fastapi import APIRouter, FastAPI
@@ -10,6 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 __dir__ = Path(__file__).parent
+exclude: List[str] = json.loads(os.environ.get("EXCLUDE", "[]"))
 
 
 def get_router(path: str) -> Optional[APIRouter]:
@@ -37,19 +39,21 @@ def auto_include_router(app: FastAPI, folder: str):
         folder (str): 要导入的文件夹
     """
     for dirpath, dirnames, filenames in os.walk(__dir__ / folder):
+        relative = str(Path(dirpath).relative_to(__dir__)).replace("\\", "/")
+        if relative in exclude:
+            continue
         sys.path.append(dirpath)
-        dirpath = str(Path(dirpath).relative_to(__dir__)).replace("\\", "/")
         for file in filenames:
             if file.endswith(".py"):
                 file = file.removesuffix(".py")
                 router = get_router(file)
                 if router is not None:
-                    app.include_router(router, prefix=f"/{dirpath}/{file}")
+                    app.include_router(router, prefix=f"/{relative}/{file}")
         for dir in dirnames:
             if not dir.startswith("."):
                 router = get_router(dir)
                 if router is not None:
-                    app.include_router(router, prefix=f"/{dirpath}/{dir}")
+                    app.include_router(router, prefix=f"/{relative}/{dir}")
 
 
 app = FastAPI()
