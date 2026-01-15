@@ -11,3 +11,5 @@ sseclient_py
 uvicorn
 Wand
 wasmtime
+python-multipart
+puremagic
