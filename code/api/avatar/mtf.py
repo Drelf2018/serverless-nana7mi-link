@@ -123,7 +123,7 @@ async def get_qq_mtf_avatar(qq: int, radius: float = Query(0.0), scale: float = 
     return await get_mtf_avatar(f"https://q1.qlogo.cn/g?b=qq&nk={qq}&s=5", radius, scale, format)
 
 
-@router.get("/")
+@router.get("")
 async def get_mtf_avatar(url: str = Query(...), radius: float = Query(0.0), scale: float = Query(1.0), format: str = Query("JPEG")):
     """
     获取 mtf 风格化头像
