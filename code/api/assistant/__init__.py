@@ -41,12 +41,12 @@ async def create_session(session: Session):
             history=session.history,
             client=AsyncOpenAI(api_key=session.key, base_url=session.url),
         )
-        return {"code": 0, "msg": r}
+        return {"code": 0, "message": r}
     except Exception as e:
         msg = type(e).__name__
         if str(e) != "":
             msg += f": {str(e)}"
-        return {"code": 1, "msg": msg}
+        return {"code": 1, "message": msg}
 
 
 @router.post("/deepseek_chat")

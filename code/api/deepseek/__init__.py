@@ -61,18 +61,18 @@ async def compute_pow_answer(challenge: str, salt: str, difficulty: int, expire_
     status_bytes = read_memory(retptr, 4)
     if len(status_bytes) != 4:
         add_to_stack(store, 16)
-        return {"code": 1, "msg": "读取状态字节失败"}
+        return {"code": 1, "message": "读取状态字节失败"}
     status = struct.unpack("<i", status_bytes)[0]
     value_bytes = read_memory(retptr + 8, 8)
     if len(value_bytes) != 8:
         add_to_stack(store, 16)
-        return {"code": 2, "msg": "读取结果字节失败"}
+        return {"code": 2, "message": "读取结果字节失败"}
     value = struct.unpack("<d", value_bytes)[0]
     # 恢复栈指针
     add_to_stack(store, 16)
     if status == 0:
-        return {"code": 3, "msg": "状态为空"}
-    return {"code": 0, "msg": "成功", "data": int(value)}
+        return {"code": 3, "message": "状态为空"}
+    return {"code": 0, "message": "成功", "data": int(value)}
 
 
 @router.get("/create_pow_challenge")
